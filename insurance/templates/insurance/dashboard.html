@@ -1,0 +1,30 @@
+{% extends 'insurance/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1>Dashboard</h1>
+<p>Total plans: {{ total_plans }}</p>
+<p>Total users: {{ total_users }}</p>
+<p>Total claims: {{ total_claims }}</p>
+<p>Pending: {{ pending_claims }}, Approved: {{ approved_claims }}, Rejected: {{ rejected_claims }}</p>
+<p>Total claim amount: ₹{{ total_claim_amount }}</p>
+<p>Approved amount: ₹{{ approved_amount }}</p>
+<h2>Recent claims</h2>
+<ul>
+{% for claim in recent_claims %}
+    <li>{{ claim }} - {{ claim.amount }}</li>
+{% empty %}
+    <li>No recent claims.</li>
+{% endfor %}
+</ul>
+
+<h2>Plans</h2>
+<ul>
+{% for plan in plans %}
+    <li><a href="{% url 'insurance:plan_detail' plan.pk %}">{{ plan.name }}</a></li>
+{% empty %}
+    <li>No active plans.</li>
+{% endfor %}
+</ul>
+{% endblock %}

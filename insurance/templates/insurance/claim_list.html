@@ -1,0 +1,23 @@
+{% extends 'insurance/base.html' %}
+{% block title %}Claims{% endblock %}
+{% block content %}
+<h1>Claims</h1>
+<form method="get">
+    <label>Status:</label>
+    <select name="status">
+        <option value="">All</option>
+        {% for code,label in status_choices %}
+            <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <button>Filter</button>
+</form>
+<ul>
+{% for claim in claims %}
+    <li><a href="{% url 'insurance:claim_detail' claim.pk %}">{{ claim }}</a> - ₹{{ claim.amount }} ({{ claim.get_status_display }})</li>
+{% empty %}
+    <li>No claims</li>
+{% endfor %}
+</ul>
+<a href="{% url 'insurance:claim_create' %}">Submit new claim</a>
+{% endblock %}

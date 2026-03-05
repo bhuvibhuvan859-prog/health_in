@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Insurance App{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <style>
+        body {font-family: Arial, sans-serif; margin: 20px;}
+        nav a {margin-right: 10px;}
+    </style>
+</head>
+<body>
+<nav>
+    <a href="{% url 'insurance:dashboard' %}">Dashboard</a> |
+    <a href="{% url 'insurance:plan_list' %}">Plans</a> |
+    <a href="{% url 'insurance:premium_calculator' %}">Calculator</a> |
+    <a href="{% url 'insurance:claim_list' %}">Claims</a> |
+    <a href="{% url 'insurance:user_profile_list' %}">Profiles</a>
+</nav>
+<hr>
+{% block content %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,16 @@
+{% extends 'insurance/base.html' %}
+{% block title %}Premium Calculator{% endblock %}
+{% block content %}
+<h1>Premium Calculator</h1>
+<form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button>Calculate</button>
+</form>
+{% if result %}
+<h2>Result</h2>
+<p>Plan: {{ result.plan.name }}</p>
+<p>Age: {{ result.age }}</p>
+<p>Monthly: ₹{{ result.calculated_monthly }}</p>
+<p>Annual: ₹{{ result.calculated_annual }}</p>
+{% endif %}
+{% endblock %}

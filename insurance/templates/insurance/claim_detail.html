@@ -1,0 +1,11 @@
+{% extends 'insurance/base.html' %}
+{% block title %}Claim {{ claim.pk }}{% endblock %}
+{% block content %}
+<h1>{{ claim }}</h1>
+<p>User: {{ claim.user }}</p>
+<p>Type: {{ claim.get_claim_type_display }}</p>
+<p>Amount: ₹{{ claim.amount }}</p>
+<p>Description: {{ claim.description }}</p>
+<p>Status: {{ claim.get_status_display }}</p>
+<p>Service date: {{ claim.date_of_service }}</p>
+{% endblock %}

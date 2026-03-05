@@ -1,0 +1,13 @@
+{% extends 'insurance/base.html' %}
+{% block title %}User Profiles{% endblock %}
+{% block content %}
+<h1>Users</h1>
+<ul>
+{% for p in profiles %}
+    <li>{{ p.name }} ({{ p.email }}) - {% if p.selected_plan %}{{ p.selected_plan.name }}{% else %}No plan{% endif %} <a href="{% url 'insurance:user_profile_edit' p.pk %}">Edit</a></li>
+{% empty %}
+    <li>No users.</li>
+{% endfor %}
+</ul>
+<a href="{% url 'insurance:user_profile_create' %}">Add new user</a>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'insurance/base.html' %}
+{% block title %}{% if editing %}Edit Profile{% else %}New Profile{% endif %}{% endblock %}
+{% block content %}
+<h1>{% if editing %}Edit{% else %}New{% endif %} User Profile</h1>
+<form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button>Save</button>
+</form>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'insurance/base.html' %}
+{% block title %}New Claim{% endblock %}
+{% block content %}
+<h1>{% if form.instance.pk %}Edit Claim{% else %}New Claim{% endif %}</h1>
+<form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button>Save</button>
+</form>
+{% endblock %}

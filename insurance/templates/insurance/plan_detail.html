@@ -1,0 +1,15 @@
+{% extends 'insurance/base.html' %}
+{% block title %}{{ plan.name }}{% endblock %}
+{% block content %}
+<h1>{{ plan.name }}</h1>
+<p>Type: {{ plan.get_plan_type_display }}</p>
+<p>Coverage: ₹{{ plan.coverage_amount }}</p>
+<p>Premium: ₹{{ plan.monthly_premium }}/month</p>
+<p>{{ plan.description }}</p>
+<p>Features:</p>
+<ul>
+{% for f in plan.get_features_list %}
+    <li>{{ f }}</li>
+{% endfor %}
+</ul>
+{% endblock %}

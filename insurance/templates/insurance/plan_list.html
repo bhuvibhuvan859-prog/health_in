@@ -1,0 +1,16 @@
+{% extends 'insurance/base.html' %}
+{% block title %}Plans{% endblock %}
+{% block content %}
+<h1>Insurance Plans</h1>
+<form method="get">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search...">
+    <button>Search</button>
+</form>
+<ul>
+{% for plan in plans %}
+    <li><a href="{% url 'insurance:plan_detail' plan.pk %}">{{ plan.name }}</a> - {{ plan.get_plan_type_display }}</li>
+{% empty %}
+    <li>No plans found.</li>
+{% endfor %}
+</ul>
+{% endblock %}
