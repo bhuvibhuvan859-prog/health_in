@@ -1,0 +1,136 @@
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: rgb(135, 206, 250); /* Sky blue background using RGB */
+    color: #333;
+    min-height: 100vh;
+    font-size: 18px; /* Larger base font size */
+    line-height: 1.6;
+}
+nav {
+    background: #ffffff;
+    padding: 20px; /* Slightly larger padding */
+    border-radius: 10px;
+    margin: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+nav a {
+    color: #007bff;
+    text-decoration: none;
+    margin: 0 20px; /* More spacing */
+    font-weight: 700; /* Bold */
+    transition: color 0.3s;
+    font-size: 20px; /* Bigger nav links */
+}
+nav a:hover {
+    color: #0056b3;
+}
+hr {
+    border: none;
+    height: 3px; /* Thicker */
+    background: #007bff;
+    margin: 30px 20px; /* More margin */
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px; /* More padding */
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+h1 {
+    color: #007bff;
+    font-size: 48px; /* Much bigger */
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+h2 {
+    color: #007bff;
+    font-size: 36px; /* Bigger */
+    font-weight: 400;
+    margin-bottom: 15px;
+}
+p, li {
+    font-size: 20px; /* Larger text */
+    line-height: 1.8;
+}
+ul {
+    list-style: none;
+    padding: 0;
+}
+li {
+    background: #f8f9fa;
+    margin: 15px 0; /* More margin */
+    padding: 20px; /* More padding */
+    border-radius: 8px;
+    border-left: 5px solid #007bff;
+    font-size: 20px;
+}
+form {
+    background: #ffffff;
+    padding: 30px; /* More padding */
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+input, select, textarea, button {
+    display: block;
+    width: 100%;
+    margin: 15px 0; /* More margin */
+    padding: 15px; /* More padding */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 20px; /* Bigger inputs */
+    font-family: 'Roboto', Arial, sans-serif;
+}
+button {
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-size: 22px; /* Bigger button text */
+    font-weight: 700;
+    padding: 20px; /* More padding */
+}
+button:hover {
+    background: #0056b3;
+}
+.result {
+    background: #d1ecf1;
+    padding: 25px; /* More padding */
+    border-radius: 8px;
+    border: 1px solid #bee5eb;
+    margin-top: 30px; /* More margin */
+    color: #0c5460;
+    font-size: 20px;
+}
+
+/* Card styles for dashboard */
+.card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin: 15px 0;
+    transition: transform 0.3s;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+.card h3 {
+    margin-top: 0;
+    color: #007bff;
+    font-size: 24px;
+}
+.card p {
+    font-size: 18px;
+    margin: 10px 0;
+}
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}

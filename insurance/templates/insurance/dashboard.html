@@ -3,28 +3,63 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h1>Dashboard</h1>
-<p>Total plans: {{ total_plans }}</p>
-<p>Total users: {{ total_users }}</p>
-<p>Total claims: {{ total_claims }}</p>
-<p>Pending: {{ pending_claims }}, Approved: {{ approved_claims }}, Rejected: {{ rejected_claims }}</p>
-<p>Total claim amount: ₹{{ total_claim_amount }}</p>
-<p>Approved amount: ₹{{ approved_amount }}</p>
-<h2>Recent claims</h2>
-<ul>
-{% for claim in recent_claims %}
-    <li>{{ claim }} - {{ claim.amount }}</li>
-{% empty %}
-    <li>No recent claims.</li>
-{% endfor %}
-</ul>
+<h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
 
-<h2>Plans</h2>
-<ul>
-{% for plan in plans %}
-    <li><a href="{% url 'insurance:plan_detail' plan.pk %}">{{ plan.name }}</a></li>
-{% empty %}
-    <li>No active plans.</li>
-{% endfor %}
-</ul>
+<div class="grid">
+    <div class="card">
+        <h3><i class="fas fa-file-alt"></i> Total Plans</h3>
+        <p>{{ total_plans }}</p>
+    </div>
+    <div class="card">
+        <h3><i class="fas fa-users"></i> Total Users</h3>
+        <p>{{ total_users }}</p>
+    </div>
+    <div class="card">
+        <h3><i class="fas fa-clipboard-list"></i> Total Claims</h3>
+        <p>{{ total_claims }}</p>
+    </div>
+    <div class="card">
+        <h3><i class="fas fa-clock"></i> Pending Claims</h3>
+        <p>{{ pending_claims }}</p>
+    </div>
+    <div class="card">
+        <h3><i class="fas fa-check-circle"></i> Approved Claims</h3>
+        <p>{{ approved_claims }}</p>
+    </div>
+    <div class="card">
+        <h3><i class="fas fa-times-circle"></i> Rejected Claims</h3>
+        <p>{{ rejected_claims }}</p>
+    </div>
+    <div class="card">
+        <h3><i class="fas fa-rupee-sign"></i> Total Claim Amount</h3>
+        <p>₹{{ total_claim_amount }}</p>
+    </div>
+    <div class="card">
+        <h3><i class="fas fa-money-bill-wave"></i> Approved Amount</h3>
+        <p>₹{{ approved_amount }}</p>
+    </div>
+</div>
+
+<div class="grid">
+    <div class="card">
+        <h3><i class="fas fa-list"></i> Recent Claims</h3>
+        <ul>
+        {% for claim in recent_claims %}
+            <li><strong>{{ claim.user.name }}</strong> - {{ claim.get_claim_type_display }} ({{ claim.get_status_display }}) - ₹{{ claim.amount }}</li>
+        {% empty %}
+            <li>No recent claims.</li>
+        {% endfor %}
+        </ul>
+    </div>
+    <div class="card">
+        <h3><i class="fas fa-shield-alt"></i> Active Plans</h3>
+        <ul>
+        {% for plan in plans %}
+            <li><a href="{% url 'insurance:plan_detail' plan.pk %}"><i class="fas fa-info-circle"></i> {{ plan.name }}</a></li>
+        {% empty %}
+            <li>No active plans.</li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
 {% endblock %}

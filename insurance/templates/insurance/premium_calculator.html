@@ -7,10 +7,12 @@
     <button>Calculate</button>
 </form>
 {% if result %}
+<div class="result">
 <h2>Result</h2>
 <p>Plan: {{ result.plan.name }}</p>
 <p>Age: {{ result.age }}</p>
 <p>Monthly: ₹{{ result.calculated_monthly }}</p>
 <p>Annual: ₹{{ result.calculated_annual }}</p>
+</div>
 {% endif %}
 {% endblock %}
