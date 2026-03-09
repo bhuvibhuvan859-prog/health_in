@@ -1,11 +1,377 @@
 {% extends 'insurance/base.html' %}
 {% block title %}Claim {{ claim.pk }}{% endblock %}
 {% block content %}
-<h1>{{ claim }}</h1>
-<p>User: {{ claim.user }}</p>
-<p>Type: {{ claim.get_claim_type_display }}</p>
-<p>Amount: ₹{{ claim.amount }}</p>
-<p>Description: {{ claim.description }}</p>
-<p>Status: {{ claim.get_status_display }}</p>
-<p>Service date: {{ claim.date_of_service }}</p>
+<style>
+    .claim-header {
+        background: linear-gradient(135deg, #0066cc 0%, #0047a3 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .claim-header h1 {
+        margin: 0 0 1rem 0;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .claim-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .claim-item {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #0066cc;
+    }
+    
+    .claim-item-label {
+        color: #999;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .claim-item-value {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-approved {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-rejected {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .status-under_review {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .action-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .action-section h3 {
+        color: #0066cc;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+    }
+    
+    .status-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .status-btn {
+        padding: 1rem;
+        border: 2px solid #e0e0e0;
+        background: white;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        font-size: 0.95rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .status-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .status-btn.pending {
+        border-color: #ffc107;
+        color: #856404;
+    }
+    
+    .status-btn.pending:hover {
+        background: #fff3cd;
+    }
+    
+    .status-btn.approved {
+        border-color: #28a745;
+        color: #155724;
+    }
+    
+    .status-btn.approved:hover {
+        background: #d4edda;
+    }
+    
+    .status-btn.rejected {
+        border-color: #dc3545;
+        color: #721c24;
+    }
+    
+    .status-btn.rejected:hover {
+        background: #f8d7da;
+    }
+    
+    .status-btn.under_review {
+        border-color: #17a2b8;
+        color: #0c5460;
+    }
+    
+    .status-btn.under_review:hover {
+        background: #d1ecf1;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #0066cc;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .form-group textarea {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-family: 'Roboto', sans-serif;
+        font-size: 1rem;
+        resize: vertical;
+        min-height: 100px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-group textarea:focus {
+        border-color: #0066cc;
+        outline: none;
+        box-shadow: 0 0 0 0.3rem rgba(0, 102, 204, 0.1);
+    }
+    
+    .rejection-reason {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border-left: 4px solid #dc3545;
+        margin-top: 1rem;
+    }
+    
+    .rejection-reason strong {
+        color: #dc3545;
+    }
+    
+    .back-link {
+        color: #0066cc;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .back-link:hover {
+        text-decoration: underline;
+    }
+    
+    .alert {
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid;
+    }
+    
+    .alert-success {
+        background: #d4edda;
+        border-color: #28a745;
+        color: #155724;
+    }
+</style>
+
+<a href="{% url 'insurance:claim_list' %}" class="back-link">
+    <i class="fas fa-arrow-left"></i> Back to Claims
+</a>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fas fa-check-circle"></i> {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="claim-header">
+    <h1>
+        <i class="fas fa-file-invoice"></i> Claim #{{ claim.pk }}
+        <span class="status-badge status-{{ claim.status }}">{{ claim.get_status_display }}</span>
+    </h1>
+    <p style="margin: 0; opacity: 0.9;">Filed on {{ claim.date_filed|date:"M d, Y at H:i" }}</p>
+</div>
+
+<div class="claim-grid">
+    <div class="claim-item">
+        <div class="claim-item-label">User</div>
+        <div class="claim-item-value">{{ claim.user.name }}</div>
+    </div>
+    
+    <div class="claim-item">
+        <div class="claim-item-label">Claim Type</div>
+        <div class="claim-item-value">{{ claim.get_claim_type_display }}</div>
+    </div>
+    
+    <div class="claim-item">
+        <div class="claim-item-label">Amount</div>
+        <div class="claim-item-value" style="color: #28a745;">₹{{ claim.amount }}</div>
+    </div>
+    
+    <div class="claim-item">
+        <div class="claim-item-label">Service Date</div>
+        <div class="claim-item-value">{{ claim.date_of_service|date:"M d, Y" }}</div>
+    </div>
+    
+    {% if claim.hospital_name %}
+    <div class="claim-item">
+        <div class="claim-item-label">Hospital</div>
+        <div class="claim-item-value">{{ claim.hospital_name }}</div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="claim-item" style="margin-bottom: 2rem;">
+    <div class="claim-item-label">Description</div>
+    <div class="claim-item-value" style="font-size: 1rem; font-weight: 400; color: #555; margin-top: 0.75rem;">
+        {{ claim.description }}
+    </div>
+</div>
+
+<!-- Status Update Section -->
+<div class="action-section">
+    <h3><i class="fas fa-tasks"></i> Update Claim Status</h3>
+    
+    <div class="status-buttons">
+        <form method="post" action="{% url 'insurance:claim_update_status' claim.pk %}" style="width: 100%;">
+            {% csrf_token %}
+            <input type="hidden" name="status" value="pending">
+            <button type="submit" class="status-btn pending" title="Mark as Pending">
+                <i class="fas fa-hourglass-half"></i>
+                <span>Pending</span>
+            </button>
+        </form>
+        
+        <form method="post" action="{% url 'insurance:claim_update_status' claim.pk %}" style="width: 100%;">
+            {% csrf_token %}
+            <input type="hidden" name="status" value="under_review">
+            <button type="submit" class="status-btn under_review" title="Mark as Under Review">
+                <i class="fas fa-search"></i>
+                <span>Under Review</span>
+            </button>
+        </form>
+        
+        <form method="post" action="{% url 'insurance:claim_update_status' claim.pk %}" style="width: 100%;">
+            {% csrf_token %}
+            <input type="hidden" name="status" value="approved">
+            <button type="submit" class="status-btn approved" title="Approve Claim">
+                <i class="fas fa-check-circle"></i>
+                <span>Approved</span>
+            </button>
+        </form>
+        
+        <form method="post" action="{% url 'insurance:claim_update_status' claim.pk %}" style="width: 100%;">
+            {% csrf_token %}
+            <input type="hidden" name="status" value="rejected">
+            <button type="submit" class="status-btn rejected" title="Reject Claim">
+                <i class="fas fa-times-circle"></i>
+                <span>Rejected</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Approval Form for Approved Claims -->
+{% if claim.status == 'approved' %}
+<div class="action-section">
+    <h3><i class="fas fa-thumbs-up"></i> Approval Details</h3>
+    <div style="background: #d4edda; padding: 1rem; border-radius: 8px; border-left: 4px solid #28a745;">
+        <strong style="color: #155724;">✓ This claim has been approved</strong>
+        {% if claim.admin_notes %}
+            <p><strong>Admin Notes:</strong> {{ claim.admin_notes }}</p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Rejection Form for Rejected Claims -->
+{% if claim.status == 'rejected' %}
+<div class="action-section">
+    <h3><i class="fas fa-times-circle"></i> Rejection Details</h3>
+    <div style="background: #f8d7da; padding: 1rem; border-radius: 8px; border-left: 4px solid #dc3545;">
+        <strong style="color: #721c24;">✗ This claim has been rejected</strong>
+        {% if claim.rejection_reason %}
+            <p><strong>Rejection Reason:</strong> {{ claim.rejection_reason }}</p>
+        {% endif %}
+        {% if claim.admin_notes %}
+            <p><strong>Admin Notes:</strong> {{ claim.admin_notes }}</p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Pending Form for Pending Claims -->
+{% if claim.status == 'pending' %}
+<div class="action-section">
+    <h3><i class="fas fa-hourglass-half"></i> Add Notes</h3>
+    
+    <form method="post" action="{% url 'insurance:claim_update_status' claim.pk %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="admin_notes">Admin Notes</label>
+            <textarea id="admin_notes" name="admin_notes" placeholder="Add internal notes for this claim..."></textarea>
+        </div>
+        
+        <input type="hidden" name="status" value="pending">
+        <button type="submit" style="background: #0066cc; color: white; padding: 0.8rem 2rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+            <i class="fas fa-save"></i> Save Notes
+        </button>
+    </form>
+</div>
+{% endif %}
+
 {% endblock %}

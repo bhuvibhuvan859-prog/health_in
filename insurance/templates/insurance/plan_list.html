@@ -1,16 +1,276 @@
 {% extends 'insurance/base.html' %}
-{% block title %}Plans{% endblock %}
+{% block title %}Insurance Plans{% endblock %}
+
 {% block content %}
-<h1>Insurance Plans</h1>
-<form method="get">
-    <input type="text" name="q" value="{{ query }}" placeholder="Search...">
-    <button>Search</button>
-</form>
-<ul>
-{% for plan in plans %}
-    <li><a href="{% url 'insurance:plan_detail' plan.pk %}">{{ plan.name }}</a> - {{ plan.get_plan_type_display }}</li>
-{% empty %}
-    <li>No plans found.</li>
-{% endfor %}
-</ul>
+<style>
+    .plan-card {
+        transition: all 0.3s ease;
+    }
+    .plan-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    /* Billing Toggle */
+    .billing-toggle-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+        margin: 2rem 0 3rem 0;
+    }
+    
+    .billing-toggle {
+        display: flex;
+        gap: 0;
+        background: #f0f0f0;
+        border-radius: 50px;
+        padding: 0.4rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .billing-btn {
+        padding: 0.8rem 2rem;
+        border: none;
+        background: transparent;
+        color: #666;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+    
+    .billing-btn.active {
+        background: linear-gradient(135deg, #0066cc 0%, #0047a3 100%);
+        color: white;
+        box-shadow: 0 2px 10px rgba(0, 102, 204, 0.3);
+    }
+    
+    .billing-btn:hover {
+        color: #0066cc;
+    }
+    
+    .discount-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+    
+    .price-display {
+        transition: all 0.3s ease;
+    }
+    
+    .price-display.hidden {
+        display: none;
+    }
+    
+    .timeline-info {
+        text-align: center;
+        color: #666;
+        font-size: 0.95rem;
+        margin-top: 1rem;
+    }
+</style>
+
+<div class="page-header">
+    <h1><i class="fas fa-shield-alt"></i> Our Insurance Plans</h1>
+    <p class="text-muted">Choose the perfect plan for your health coverage needs</p>
+</div>
+
+<!-- Billing Toggle -->
+<div class="billing-toggle-container">
+    <div class="billing-toggle">
+        <button class="billing-btn active" onclick="toggleBilling('monthly')" id="monthlyBtn">
+            <i class="fas fa-calendar-alt"></i> Monthly
+        </button>
+        <button class="billing-btn" onclick="toggleBilling('yearly')" id="yearlyBtn">
+            <i class="fas fa-calendar"></i> Yearly
+        </button>
+    </div>
+    <div style="text-align: center;">
+        <span id="savingsText" class="discount-badge" style="display: none;">
+            <i class="fas fa-tag"></i> Save 2 Months!
+        </span>
+    </div>
+</div>
+
+<!-- Search Bar -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <form method="get" class="d-flex gap-2">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search plans..." class="form-control">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+        </form>
+    </div>
+</div>
+
+<!-- Plans Grid -->
+<div class="row" id="plansContainer">
+    {% for plan in plans %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card plan-card {% if plan.plan_type == 'diamond' %}diamond{% elif plan.plan_type == 'silver' %}silver{% elif plan.plan_type == 'premium' %}gold{% endif %}">
+                <!-- Badge for Plan Types -->
+                <div class="plan-badge">
+                    {% if plan.plan_type == 'diamond' %}
+                        <i class="fas fa-gem"></i> DIAMOND
+                    {% elif plan.plan_type == 'silver' %}
+                        <i class="fas fa-medal"></i> SILVER
+                    {% elif plan.plan_type == 'premium' %}
+                        <i class="fas fa-crown"></i> PREMIUM
+                    {% else %}
+                        <i class="fas fa-heart"></i> BASIC
+                    {% endif %}
+                </div>
+                
+                <div class="card-header">
+                    <div class="plan-name">
+                        <i class="fas fa-heart"></i> {{ plan.name }}
+                    </div>
+                    
+                    <!-- Monthly Price Display -->
+                    <div class="price-display monthly-price" id="price-monthly-{{ plan.pk }}">
+                        <div class="plan-price">₹{{ plan.monthly_premium }}<span class="plan-price-label">/month</span></div>
+                        <small class="text-light">Renews monthly</small>
+                    </div>
+                    
+                    <!-- Yearly Price Display -->
+                    <div class="price-display yearly-price hidden" id="price-yearly-{{ plan.pk }}">
+                        <div class="plan-price">₹{{ plan.annual_premium|floatformat:0 }}<span class="plan-price-label">/year</span></div>
+                        <small class="text-light" style="color: #90ee90; font-weight: 600;">Save 2 months! ✓</small>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <p class="text-muted mb-3" style="font-size: 0.95rem;">{{ plan.description }}</p>
+                    
+                    <div class="mb-3 p-3" style="background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); border-radius: 8px; border-left: 4px solid var(--primary);">
+                        <div class="detail-label" style="color: #666;">Max Coverage Amount</div>
+                        <div class="detail-value" style="color: var(--primary); font-size: 1.6rem;">₹{{ plan.coverage_amount|floatformat:0 }}</div>
+                    </div>
+                    
+                    <!-- Pricing Timeline -->
+                    <div class="timeline-info">
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <div style="flex: 1; padding: 0.8rem; background: #f9f9f9; border-radius: 6px;">
+                                <small style="color: #999;">Monthly</small>
+                                <div style="font-weight: 600; color: var(--primary);">₹{{ plan.monthly_premium }}</div>
+                            </div>
+                            <div style="flex: 1; padding: 0.8rem; background: #f0f7ff; border-radius: 6px;">
+                                <small style="color: #999;">Annual</small>
+                                <div style="font-weight: 600; color: var(--primary);">₹{{ plan.annual_premium|floatformat:0 }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h6 style="color: var(--primary); font-weight: 600; margin-top: 1.5rem; margin-bottom: 1rem;">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i> Key Features:
+                    </h6>
+                    <ul class="plan-features">
+                        {% for feature in plan.get_features_list %}
+                            <li style="font-size: 0.95rem; padding: 0.6rem 0;">{{ feature }}</li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 2rem;">
+                        <a href="{% url 'insurance:plan_detail' plan.pk %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i> Details
+                        </a>
+                        <a href="{% url 'insurance:premium_calculator' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-calculator"></i> Calculate
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center" style="font-size: 1.1rem;">
+                <i class="fas fa-info-circle"></i> No plans found matching your search.
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Plan Comparison Table -->
+<div class="mt-5">
+    <h2 class="mb-4"><i class="fas fa-table"></i> Plan Comparison</h2>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr style="background: linear-gradient(135deg, #0066cc 0%, #0047a3 100%); color: white;">
+                    <th style="color: white;">Plan Type</th>
+                    <th style="color: white;">Coverage Amount</th>
+                    <th style="color: white;">Monthly Premium</th>
+                    <th style="color: white;">Annual Premium</th>
+                    <th style="color: white;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for plan in plans %}
+                    <tr>
+                        <td>
+                            <strong>
+                                {% if plan.plan_type == 'diamond' %}
+                                    <i class="fas fa-gem" style="color: #00d9ff;"></i>
+                                {% elif plan.plan_type == 'silver' %}
+                                    <i class="fas fa-medal" style="color: #c0c0c0;"></i>
+                                {% elif plan.plan_type == 'premium' %}
+                                    <i class="fas fa-crown" style="color: #ffd700;"></i>
+                                {% endif %}
+                                {{ plan.get_plan_type_display }}
+                            </strong>
+                        </td>
+                        <td>₹{{ plan.coverage_amount|floatformat:0 }}</td>
+                        <td>₹{{ plan.monthly_premium }}</td>
+                        <td>₹{{ plan.annual_premium }}</td>
+                        <td>
+                            <a href="{% url 'insurance:plan_detail' plan.pk %}" class="btn btn-sm btn-primary">View</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function toggleBilling(type) {
+    // Update button states
+    document.getElementById('monthlyBtn').classList.toggle('active', type === 'monthly');
+    document.getElementById('yearlyBtn').classList.toggle('active', type === 'yearly');
+    
+    // Update savings text
+    const savingsText = document.getElementById('savingsText');
+    if (type === 'yearly') {
+        savingsText.style.display = 'inline-block';
+    } else {
+        savingsText.style.display = 'none';
+    }
+    
+    // Update price displays for all plans
+    const monthlyPrices = document.querySelectorAll('.monthly-price');
+    const yearlyPrices = document.querySelectorAll('.yearly-price');
+    
+    if (type === 'monthly') {
+        monthlyPrices.forEach(el => el.classList.remove('hidden'));
+        yearlyPrices.forEach(el => el.classList.add('hidden'));
+    } else {
+        monthlyPrices.forEach(el => el.classList.add('hidden'));
+        yearlyPrices.forEach(el => el.classList.remove('hidden'));
+    }
+    
+    // Add animation effect
+    const container = document.getElementById('plansContainer');
+    container.style.opacity = '0.7';
+    setTimeout(() => {
+        container.style.opacity = '1';
+    }, 150);
+}
+</script>
 {% endblock %}

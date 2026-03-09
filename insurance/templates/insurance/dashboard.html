@@ -3,63 +3,183 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+<div class="page-header">
+    <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+    <p class="text-muted">Welcome back! Here's your insurance overview</p>
+</div>
 
-<div class="grid">
-    <div class="card">
-        <h3><i class="fas fa-file-alt"></i> Total Plans</h3>
-        <p>{{ total_plans }}</p>
+<!-- Stats Row 1 -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+            <div class="stat-number">{{ total_plans }}</div>
+            <div class="stat-label">Active Plans</div>
+        </div>
     </div>
-    <div class="card">
-        <h3><i class="fas fa-users"></i> Total Users</h3>
-        <p>{{ total_users }}</p>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-number">{{ total_users }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
     </div>
-    <div class="card">
-        <h3><i class="fas fa-clipboard-list"></i> Total Claims</h3>
-        <p>{{ total_claims }}</p>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
+            <div class="stat-number">{{ total_claims }}</div>
+            <div class="stat-label">Total Claims</div>
+        </div>
     </div>
-    <div class="card">
-        <h3><i class="fas fa-clock"></i> Pending Claims</h3>
-        <p>{{ pending_claims }}</p>
-    </div>
-    <div class="card">
-        <h3><i class="fas fa-check-circle"></i> Approved Claims</h3>
-        <p>{{ approved_claims }}</p>
-    </div>
-    <div class="card">
-        <h3><i class="fas fa-times-circle"></i> Rejected Claims</h3>
-        <p>{{ rejected_claims }}</p>
-    </div>
-    <div class="card">
-        <h3><i class="fas fa-rupee-sign"></i> Total Claim Amount</h3>
-        <p>₹{{ total_claim_amount }}</p>
-    </div>
-    <div class="card">
-        <h3><i class="fas fa-money-bill-wave"></i> Approved Amount</h3>
-        <p>₹{{ approved_amount }}</p>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-rupee-sign"></i></div>
+            <div class="stat-number">₹{{ total_claim_amount }}</div>
+            <div class="stat-label">Total Claim Value</div>
+        </div>
     </div>
 </div>
 
-<div class="grid">
-    <div class="card">
-        <h3><i class="fas fa-list"></i> Recent Claims</h3>
-        <ul>
-        {% for claim in recent_claims %}
-            <li><strong>{{ claim.user.name }}</strong> - {{ claim.get_claim_type_display }} ({{ claim.get_status_display }}) - ₹{{ claim.amount }}</li>
-        {% empty %}
-            <li>No recent claims.</li>
-        {% endfor %}
-        </ul>
+<!-- Stats Row 2 -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="color: #ffc107;"><i class="fas fa-clock"></i></div>
+            <div class="stat-number">{{ pending_claims }}</div>
+            <div class="stat-label">Pending Claims</div>
+        </div>
     </div>
-    <div class="card">
-        <h3><i class="fas fa-shield-alt"></i> Active Plans</h3>
-        <ul>
-        {% for plan in plans %}
-            <li><a href="{% url 'insurance:plan_detail' plan.pk %}"><i class="fas fa-info-circle"></i> {{ plan.name }}</a></li>
-        {% empty %}
-            <li>No active plans.</li>
-        {% endfor %}
-        </ul>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="color: #28a745;"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-number">{{ approved_claims }}</div>
+            <div class="stat-label">Approved Claims</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="color: #dc3545;"><i class="fas fa-times-circle"></i></div>
+            <div class="stat-number">{{ rejected_claims }}</div>
+            <div class="stat-label">Rejected Claims</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="color: #28a745;"><i class="fas fa-money-bill-wave"></i></div>
+            <div class="stat-number">₹{{ approved_amount }}</div>
+            <div class="stat-label">Approved Amount</div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="row">
+    <!-- Recent Claims -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-list"></i> Recent Claims
+            </div>
+            <div class="card-body">
+                {% if recent_claims %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for claim in recent_claims %}
+                                    <tr>
+                                        <td><strong>{{ claim.user.name }}</strong></td>
+                                        <td>{{ claim.get_claim_type_display }}</td>
+                                        <td>₹{{ claim.amount }}</td>
+                                        <td>
+                                            <span class="badge" style="background: {% if claim.status == 'approved' %}#28a745{% elif claim.status == 'rejected' %}#dc3545{% elif claim.status == 'pending' %}#ffc107{% else %}#17a2b8{% endif %};">
+                                                {{ claim.get_status_display }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <a href="{% url 'insurance:claim_list' %}" class="btn btn-sm btn-primary w-100 mt-3">View All Claims</a>
+                {% else %}
+                    <p class="text-muted">No recent claims.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Plans -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-shield-alt"></i> Active Plans
+            </div>
+            <div class="card-body">
+                {% if plans %}
+                    <div class="list-group">
+                        {% for plan in plans %}
+                            <a href="{% url 'insurance:plan_detail' plan.pk %}" class="list-group-item list-group-item-action" style="border: none; padding: 1rem 0; border-bottom: 1px solid #eee;">
+                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                    <div>
+                                        <h6 style="margin: 0; color: var(--primary);">{{ plan.name }}</h6>
+                                        <small class="text-muted">Coverage: ₹{{ plan.coverage_amount }}</small>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <strong style="color: var(--primary);">₹{{ plan.monthly_premium }}/mo</strong>
+                                        <br>
+                                        <small class="text-muted">₹{{ plan.annual_premium }}/yr</small>
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                    <a href="{% url 'insurance:plan_list' %}" class="btn btn-sm btn-primary w-100 mt-3">View All Plans</a>
+                {% else %}
+                    <p class="text-muted">No active plans.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <h3 class="mb-3"><i class="fas fa-lightning-bolt"></i> Quick Actions</h3>
+        <div class="row">
+            <div class="col-md-3 col-sm-6 mb-3">
+                <a href="{% url 'insurance:premium_calculator' %}" class="btn btn-outline-primary w-100 py-3">
+                    <i class="fas fa-calculator fa-lg"></i><br>
+                    <span>Calculate Premium</span>
+                </a>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <a href="{% url 'insurance:claim_create' %}" class="btn btn-outline-primary w-100 py-3">
+                    <i class="fas fa-file-invoice fa-lg"></i><br>
+                    <span>File a Claim</span>
+                </a>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <a href="{% url 'insurance:user_profile_create' %}" class="btn btn-outline-primary w-100 py-3">
+                    <i class="fas fa-user-plus fa-lg"></i><br>
+                    <span>New Profile</span>
+                </a>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <a href="{% url 'insurance:plan_list' %}" class="btn btn-outline-primary w-100 py-3">
+                    <i class="fas fa-shield-alt fa-lg"></i><br>
+                    <span>Browse Plans</span>
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

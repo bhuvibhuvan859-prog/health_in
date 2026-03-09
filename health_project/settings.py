@@ -116,3 +116,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Authentication
+LOGIN_URL = 'insurance:login'
+LOGIN_REDIRECT_URL = 'insurance:dashboard'
+LOGOUT_REDIRECT_URL = 'insurance:login'

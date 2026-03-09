@@ -4,14 +4,22 @@ from django.db import models
 class InsurancePlan(models.Model):
     PLAN_TYPE_CHOICES = [
         ('basic', 'Basic'),
+        ('silver', 'Silver'),
         ('standard', 'Standard'),
+        ('diamond', 'Diamond'),
         ('premium', 'Premium'),
+    ]
+    
+    BILLING_FREQUENCY_CHOICES = [
+        ('monthly', 'Monthly'),
+        ('yearly', 'Yearly'),
     ]
 
     name = models.CharField(max_length=200)
     plan_type = models.CharField(max_length=20, choices=PLAN_TYPE_CHOICES)
     coverage_amount = models.DecimalField(max_digits=12, decimal_places=2)
     monthly_premium = models.DecimalField(max_digits=10, decimal_places=2)
+    billing_frequency = models.CharField(max_length=20, choices=BILLING_FREQUENCY_CHOICES, default='monthly')
     description = models.TextField()
     features = models.TextField(help_text="Comma-separated list of features")
     is_active = models.BooleanField(default=True)
@@ -76,6 +84,8 @@ class Claim(models.Model):
     date_of_service = models.DateField()
     date_filed = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
+    rejection_reason = models.TextField(blank=True, null=True, help_text="Reason for claim rejection")
+    admin_notes = models.TextField(blank=True, null=True, help_text="Internal notes from admin")
 
     def __str__(self):
         return f"Claim #{self.pk} - {self.get_claim_type_display()} ({self.get_status_display()})"

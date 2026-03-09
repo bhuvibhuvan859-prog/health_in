@@ -1,15 +1,131 @@
 {% extends 'insurance/base.html' %}
-{% block title %}{{ plan.name }}{% endblock %}
+{% block title %}{{ plan.name }} - Details{% endblock %}
+
 {% block content %}
-<h1>{{ plan.name }}</h1>
-<p>Type: {{ plan.get_plan_type_display }}</p>
-<p>Coverage: ₹{{ plan.coverage_amount }}</p>
-<p>Premium: ₹{{ plan.monthly_premium }}/month</p>
-<p>{{ plan.description }}</p>
-<p>Features:</p>
-<ul>
-{% for f in plan.get_features_list %}
-    <li>{{ f }}</li>
-{% endfor %}
-</ul>
+<a href="{% url 'insurance:plan_list' %}" class="btn btn-outline-primary mb-3">
+    <i class="fas fa-arrow-left"></i> Back to Plans
+</a>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card plan-card">
+            <div class="card-header" style="padding: 2rem;">
+                <h1 class="plan-name" style="margin: 0; font-size: 2.5rem;">
+                    <i class="fas fa-heart"></i> {{ plan.name }}
+                </h1>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
+                    <span class="badge" style="background: var(--primary); padding: 0.5rem 1rem; font-size: 1rem;">
+                        {{ plan.get_plan_type_display }}
+                    </span>
+                    <span class="badge" style="background: var(--accent); padding: 0.5rem 1rem; font-size: 1rem;">
+                        {{ plan.get_billing_frequency_display }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <!-- Description -->
+                <div class="mb-4">
+                    <h5 class="text-muted mb-2">About This Plan</h5>
+                    <p class="lead">{{ plan.description }}</p>
+                </div>
+
+                <!-- Pricing Section -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div style="background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%); padding: 1.5rem; border-radius: 10px;">
+                            <small style="color: var(--secondary); font-weight: 600;">MONTHLY PREMIUM</small>
+                            <h2 style="color: var(--primary); margin: 0.5rem 0;">₹{{ plan.monthly_premium }}</h2>
+                            <small style="color: var(--secondary);">per month</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div style="background: linear-gradient(135deg, #f0fff7 0%, #e8f8f5 100%); padding: 1.5rem; border-radius: 10px;">
+                            <small style="color: var(--secondary); font-weight: 600;">ANNUAL PREMIUM</small>
+                            <h2 style="color: var(--success); margin: 0.5rem 0;">₹{{ plan.annual_premium }}</h2>
+                            <small style="color: var(--secondary);">per year (Save {{ plan.annual_premium|add:"-"}}{{ plan.monthly_premium|multiply:"12" }}%)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coverage Amount -->
+                <div class="alert alert-info mb-4" style="border-radius: 10px;">
+                    <i class="fas fa-shield-alt"></i> <strong>Total Coverage:</strong> ₹{{ plan.coverage_amount }}
+                </div>
+
+                <!-- Features -->
+                <div class="mb-4">
+                    <h5 style="color: var(--primary); font-weight: 600; margin-bottom: 1.5rem;">
+                        <i class="fas fa-check-circle"></i> Plan Features
+                    </h5>
+                    <div class="row">
+                        {% for feature in plan.get_features_list %}
+                            <div class="col-md-6 mb-3">
+                                <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                                    <i class="fas fa-check" style="color: var(--success); font-size: 1.2rem; margin-top: 0.25rem;"></i>
+                                    <span>{{ feature }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- CTA Buttons -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <a href="{% url 'insurance:premium_calculator' %}" class="btn btn-primary w-100 py-3">
+                            <i class="fas fa-calculator"></i> Calculate Your Premium
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="{% url 'insurance:user_profile_create' %}" class="btn btn-outline-primary w-100 py-3">
+                            <i class="fas fa-user-plus"></i> Get This Plan
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plan Details Table -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="fas fa-info-circle"></i> Plan Details
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th style="color: var(--primary); font-weight: 600;">Plan Type</th>
+                        <td>{{ plan.get_plan_type_display }}</td>
+                    </tr>
+                    <tr>
+                        <th style="color: var(--primary); font-weight: 600;">Billing Frequency</th>
+                        <td>{{ plan.get_billing_frequency_display }}</td>
+                    </tr>
+                    <tr>
+                        <th style="color: var(--primary); font-weight: 600;">Total Coverage</th>
+                        <td>₹{{ plan.coverage_amount }}</td>
+                    </tr>
+                    <tr>
+                        <th style="color: var(--primary); font-weight: 600;">Monthly Premium</th>
+                        <td>₹{{ plan.monthly_premium }}</td>
+                    </tr>
+                    <tr>
+                        <th style="color: var(--primary); font-weight: 600;">Annual Premium</th>
+                        <td>₹{{ plan.annual_premium }}</td>
+                    </tr>
+                    <tr>
+                        <th style="color: var(--primary); font-weight: 600;">Status</th>
+                        <td>
+                            {% if plan.is_active %}
+                                <span class="badge" style="background: var(--success); padding: 0.5rem 1rem;">Active</span>
+                            {% else %}
+                                <span class="badge" style="background: var(--danger); padding: 0.5rem 1rem;">Inactive</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

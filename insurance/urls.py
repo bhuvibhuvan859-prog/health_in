@@ -4,6 +4,12 @@ from . import views
 app_name = 'insurance'
 
 urlpatterns = [
+    # Auth routes
+    path('register/', views.SignUpView.as_view(), name='register'),
+    path('login/', views.CustomLoginView.as_view(), name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    
+    # Main routes
     path('', views.dashboard, name='dashboard'),
     path('plans/', views.plan_list, name='plan_list'),
     path('plans/<int:pk>/', views.plan_detail, name='plan_detail'),
@@ -11,6 +17,9 @@ urlpatterns = [
     path('claims/', views.claim_list, name='claim_list'),
     path('claims/new/', views.claim_create, name='claim_create'),
     path('claims/<int:pk>/', views.claim_detail, name='claim_detail'),
+    path('claims/<int:pk>/approve/', views.claim_approve, name='claim_approve'),
+    path('claims/<int:pk>/reject/', views.claim_reject, name='claim_reject'),
+    path('claims/<int:pk>/update-status/', views.claim_update_status, name='claim_update_status'),
     path('profiles/', views.user_profile_list, name='user_profile_list'),
     path('profiles/new/', views.user_profile_create, name='user_profile_create'),
     path('profiles/<int:pk>/edit/', views.user_profile_edit, name='user_profile_edit'),

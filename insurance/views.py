@@ -1,8 +1,36 @@
 from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
+from django.contrib import messages
 from django.db.models import Sum, Count, Q
+from django.views.generic import CreateView
+from django.urls import reverse_lazy
 from .models import InsurancePlan, UserProfile, Claim, PremiumCalculation
-from .forms import UserProfileForm, ClaimForm, PremiumCalculatorForm
+from .forms import UserProfileForm, ClaimForm, PremiumCalculatorForm, SignUpForm
+
+
+class CustomLoginView(LoginView):
+    template_name = 'insurance/login.html'
+    redirect_authenticated_user = True
+    next_page = 'insurance:dashboard'
+
+
+class SignUpView(CreateView):
+    form_class = SignUpForm
+    template_name = 'insurance/register.html'
+    success_url = reverse_lazy('insurance:login')
+    
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('insurance:dashboard')
+        return super().get(request, *args, **kwargs)
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('insurance:login')
 
 
 def dashboard(request):
@@ -150,6 +178,51 @@ def claim_detail(request, pk):
     """View details of a single claim."""
     claim = get_object_or_404(Claim.objects.select_related('user'), pk=pk)
     return render(request, 'insurance/claim_detail.html', {'claim': claim})
+
+
+def claim_approve(request, pk):
+    """Approve a pending claim."""
+    claim = get_object_or_404(Claim, pk=pk)
+    if request.method == 'POST':
+        if claim.status == 'pending':
+            claim.status = 'approved'
+            claim.admin_notes = request.POST.get('admin_notes', '')
+            claim.rejection_reason = ''
+            claim.save()
+            messages.success(request, 'Claim approved successfully!')
+    return redirect('insurance:claim_detail', pk=pk)
+
+
+def claim_reject(request, pk):
+    """Reject a pending claim."""
+    claim = get_object_or_404(Claim, pk=pk)
+    if request.method == 'POST':
+        if claim.status == 'pending':
+            claim.status = 'rejected'
+            claim.rejection_reason = request.POST.get('rejection_reason', 'No reason provided')
+            claim.admin_notes = request.POST.get('admin_notes', '')
+            claim.save()
+            messages.success(request, 'Claim rejected successfully!')
+    return redirect('insurance:claim_detail', pk=pk)
+
+
+def claim_update_status(request, pk):
+    """Update claim status."""
+    claim = get_object_or_404(Claim, pk=pk)
+    if request.method == 'POST':
+        new_status = request.POST.get('status', '')
+        if new_status in dict(Claim.STATUS_CHOICES):
+            claim.status = new_status
+            if new_status == 'approved' and claim.status != 'approved':
+                claim.admin_notes = request.POST.get('admin_notes', '')
+            elif new_status == 'rejected' and claim.status != 'rejected':
+                claim.rejection_reason = request.POST.get('rejection_reason', '')
+                claim.admin_notes = request.POST.get('admin_notes', '')
+            elif new_status == 'pending':
+                claim.rejection_reason = ''
+            claim.save()
+            messages.success(request, f'Claim status updated to {claim.get_status_display()}!')
+    return redirect('insurance:claim_detail', pk=pk)
 
 
 def user_profile_list(request):
